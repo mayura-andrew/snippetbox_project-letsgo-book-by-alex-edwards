@@ -44,10 +44,10 @@ func main() {
 	}
 	// use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
+	// mux := http.NewServeMux()
+	// mux.HandleFunc("/", app.home)
+	// mux.HandleFunc("/snippet", app.showSnippet)
+	// mux.HandleFunc("/snippet/create", app.createSnippet)
 	// Use the http.ListenAndServe() function to start a new web server. We pas
 	// two parameters: the TCP network address to listen on (in this case ":4000
 	// and the servemux we just created. If http.ListenAndServe() returns an er
@@ -56,18 +56,18 @@ func main() {
 	// Create a file server which serves files out of the "./ui/static" directo
 	// Note that the path given to the http.Dir function is relative to the pro
 	// directory root.
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+//fileServer := http.FileServer(http.Dir("./ui/static/"))
 
 	// Use the mux.Handle() function to register the file server as the handler
 	// all URL paths that start with "/static/". For matching paths, we strip t
 	// "/static" prefix before the request reaches the file server
 
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+//	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	
 	srv := &http.Server{
 		Addr: *addr,
 		ErrorLog: errorLog,
-		Handler: mux,
+		Handler: app.routes(), // call the new app.routes() method
 	}
 	infoLog.Printf("Starting server on %s", *addr)
 	err := srv.ListenAndServe()
