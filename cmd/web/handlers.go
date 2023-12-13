@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"mayuraandrew.tech/snippetbox/pkg/models"
 )
 
 // define a home handler function which write a byte slice containing
@@ -26,30 +27,40 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Initialize a slice containing the paths to the two files. Note that the
 	// home.page.tmpl file must be the *first* file in the slice.
 
-	files := []string{
-		"./ui/html/home.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
-// Initialize a slice containing the paths to the two files. Note that the
-// home.page.tmpl file must be the *first* file in the slice.
-
-	ts, err := template.ParseFiles(files...)
+	s, err := app.snippets.Latest()
 	if err != nil {
-		// app.errorLog.Println(err.Error())
-		// http.Error(w, "Internal Server Error", 500)
-		app.serverError(w, err) // use the serverError()helper
+		app.serverError(w, err)
 		return
 	}
 
+	for _, snippet := range s {
+		fmt.Fprint(w, "%v\n", snippet)
+	}
+// 	files := []string{
+// 		"./ui/html/home.page.tmpl",
+// 		"./ui/html/base.layout.tmpl",
+// 		"./ui/html/footer.partial.tmpl",
+// 	}
+// // Initialize a slice containing the paths to the two files. Note that the
+// // home.page.tmpl file must be the *first* file in the slice.
 
-	err = ts.Execute(w, nil)
-		if err != nil {
-			// app.errorLog.Println(err.Error())
-			// http.Error(w, "Internal Server Error", 500)
-			app.serverError(w, err) // use the serverError() helper
-			return
-		}
+// 	ts, err := template.ParseFiles(files...)
+// 	if err != nil {
+// 		// app.errorLog.Println(err.Error())
+// 		// http.Error(w, "Internal Server Error", 500)
+// 		w.Write([]byte("Create a new snippet..."))
+// 		app.serverError(w, err) // use the serverError()helper
+// 		return
+// 	}
+
+
+// 	err = ts.Execute(w, nil)
+// 		if err != nil {
+// 			// app.errorLog.Println(err.Error())
+// 			// http.Error(w, "Internal Server Error", 500)
+// 			app.serverError(w, err) // use the serverError() helper
+// 			return
+// 		}
 }
 
 // add a showSnippet hanler function
@@ -66,14 +77,45 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		// http.NotFound(w, r)
 		app.notFound(w)
 		return
-		
 	}
 
 	// Use the fmt.Fprintf() function to interpolate the id value with our respo
-// and write it to the http.ResponseWriter.
+	// and write it to the http.ResponseWriter.
+	
+	// Use the SnippetModel object's Get method to retrieve the data for a
+	// specific record based on its ID. If no matching record is found,
+	// return a 404 Not Found response.
 
-	fmt.Fprintf(w, "Display a specific snipper with ID %d...", id)
+	s, err := app.snippets.Get(id)
+	if err == models.ErrNoRecord {
+		app.notFound(w)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
+	// initialize a slice containing the paths to the show.page.tmpl file,
+	// plus the base layout and footer partial that we made earlier.
+
+	files := []string {
+		"./ui/html/show.page.tmpl",
+		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
+	}
+
+	// Parse the template files...
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	// and then execute them. notice how we are passing in the snippet
+	// data (a models.Snippet struct) as the final parameter
+	err = ts.Execute(w, s)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 // add a createSnippet handler fucntion
@@ -93,7 +135,21 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	w.Write([]byte("Create a new snippet..."))
+
+	// creaate some variables holding dummy data. We'll remove these later on during the build.
+	title := "0 snail"
+	content := "0 snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n- Kobayashi"
+	expires := "7"
+
+	// pass the data the SnippetModel.Insert() method, receiving the ID of the new record back.
+	id, err := app.snippets.Insert(title, content, expires)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// redirect the user tp the relevant page for the snippet.
+	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
 }
 
 
