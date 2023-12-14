@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"bytes"
+	"time"
 )
 
 // the serverError helper write an error message and stack trace to the errorlog
@@ -36,9 +38,27 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 		app.serverError(w, fmt.Errorf("The template %s does not exist", name))
 		return
 	}
+
+	// initialize a new buffer
+
+	buf := new(bytes.Buffer)
 	// exectute the templte set, passing in any dynamic data.
-	err := ts.Execute(w, td)
+	err := ts.Execute(buf, app.addDefaultData(td, r))
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
+
+	buf.WriteTo(w)
 }
+
+
+func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
+	if td == nil {
+		td = &templateData{}
+	}
+
+	td.CurrentYear = time.Now().Year()
+	return td
+}
+

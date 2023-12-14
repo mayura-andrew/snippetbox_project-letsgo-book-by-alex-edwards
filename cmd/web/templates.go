@@ -13,9 +13,10 @@ import (
 
 
 type templateData struct {
+	CurrentYear int
 	Snippet *models.Snippet
 	Snippets []*models.Snippet
-	
+
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
