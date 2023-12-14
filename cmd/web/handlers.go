@@ -38,7 +38,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data := &templateData{Snippets: s}
 
 	files := []string {
-		"./ui/html/show.page.tmpl",
+		"./ui/html/home.page.tmpl",
 		"./ui/html/base.layout.tmpl",
 		"./ui/html/footer.partial.tmpl",
 	}
@@ -53,8 +53,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.serverError(w, err)
 	}
-
+	
 }
+
 // 	files := []string{
 // 		"./ui/html/home.page.tmpl",
 // 		"./ui/html/base.layout.tmpl",
@@ -119,13 +120,14 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	// initialize a slice containing the paths to the show.page.tmpl file,
 	// plus the base layout and footer partial that we made earlier.
 	files := []string {
-		"./ui/html/home.page.tmpl",
+		"./ui/html/show.page.tmpl",
 		"./ui/html/base.layout.tmpl",
 		"./ui/html/footer.partial.tmpl",
 	}
 
 	// Parse the template files...
 	ts, err := template.ParseFiles(files...)
+
 	if err != nil {
 		app.serverError(w, err)
 		return
