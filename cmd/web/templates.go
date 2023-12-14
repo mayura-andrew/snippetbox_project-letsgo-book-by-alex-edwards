@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 	"mayuraandrew.tech/snippetbox/pkg/models"
 )
 
@@ -19,6 +20,13 @@ type templateData struct {
 
 }
 
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+var function = template.FuncMap{
+	"humanDate": humanDate,
+}
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	// initalize a new map to act as the cache
 	cache := map[string]*template.Template{}
@@ -35,7 +43,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 		name := filepath.Base(page)
 
 		// parse the page template file in to a template set.
-		ts, err := template.ParseFiles(page)
+		ts, err := template.New(name).Funcs(function).ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}
