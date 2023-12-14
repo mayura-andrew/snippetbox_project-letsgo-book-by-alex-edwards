@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-
+	"html/template"
 	_ "github.com/go-sql-driver/mysql"
 	"mayuraandrew.tech/snippetbox/pkg/models/mysql"
 )
@@ -19,6 +19,7 @@ type application struct {
 	errorLog *log.Logger
 	infoLog *log.Logger
 	snippets *mysql.SnippetModel
+	templateCache map[string]*template.Template
 }
 func main() {
 	// Define a new command-line flag with the name 'addr', a default value of
@@ -52,12 +53,19 @@ func main() {
 	// initialize a new instance of application containing the dependencies.
 
 	defer db.Close()
+	// initialzie a new template cahce..
+	templateCache, err := newTemplateCache("./ui/html")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 
 	app := &application{
 		errorLog: errorLog,
 		infoLog: infoLog,
 		// initialize a mysql.SnippetModel instance and add it to the application dependencies.
 		snippets: &mysql.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 	// use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern
