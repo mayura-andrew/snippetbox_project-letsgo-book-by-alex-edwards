@@ -99,8 +99,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//flash := app.session.PopString(r, "flash")
+
 	// use the new render helper 
 	app.render(w, r, "show.page.tmpl", &templateData{
+	//	Flash: flash,
 		Snippet: s,
 	})
 }
@@ -181,6 +184,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.session.Put(r, "flash", "Snippet successfully created!")
 	// redirect the user tp the relevant page for the snippet.
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }

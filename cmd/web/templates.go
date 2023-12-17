@@ -16,6 +16,7 @@ import (
 
 
 type templateData struct {
+	Flash string
 	CurrentYear int
 	Snippet *models.Snippet
 	Snippets []*models.Snippet

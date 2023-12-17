@@ -3,11 +3,14 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"html/template"
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 	"mayuraandrew.tech/snippetbox/pkg/models/mysql"
 )
 
@@ -20,6 +23,7 @@ type application struct {
 	infoLog *log.Logger
 	snippets *mysql.SnippetModel
 	templateCache map[string]*template.Template
+	session *sessions.Session
 }
 func main() {
 	// Define a new command-line flag with the name 'addr', a default value of
@@ -39,6 +43,7 @@ func main() {
 	// variable. You need to call this *before* you use the addr variable
 	// otherwise it will always contain the default value of ":4000". If any
 	// encountered during parsing the application will be terminated.
+	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -59,10 +64,13 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
 
 	app := &application{
 		errorLog: errorLog,
 		infoLog: infoLog,
+		session: session,
 		// initialize a mysql.SnippetModel instance and add it to the application dependencies.
 		snippets: &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
