@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"path/filepath"
 	"time"
+
+	"mayuraandrew.tech/snippetbox/pkg/forms"
 	"mayuraandrew.tech/snippetbox/pkg/models"
 )
 
@@ -17,7 +19,7 @@ type templateData struct {
 	CurrentYear int
 	Snippet *models.Snippet
 	Snippets []*models.Snippet
-
+	Form *forms.Form
 }
 
 func humanDate(t time.Time) string {
