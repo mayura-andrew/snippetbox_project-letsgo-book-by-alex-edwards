@@ -25,6 +25,7 @@ type application struct {
 	snippets *mysql.SnippetModel
 	templateCache map[string]*template.Template
 	session *sessions.Session
+	users *mysql.UserModel
 }
 func main() {
 	// Define a new command-line flag with the name 'addr', a default value of
@@ -37,7 +38,7 @@ func main() {
 	// Define a new command-line flag for the MySQL DNS string
 	//fmt.Printf("web:pass@tcp(localhost:3306)/snippetbox?parseTime=true")
 
-	dsn := flag.String("dsn", "root:mypass@/snippetbox?parseTime=true", "MySQL database")
+	dsn := flag.String("dsn", "andrew:andrewSQL@/snippetbox?parseTime=true", "MySQL database")
 
 	// Importantly, we use the flag.Parse() function to parse the command-line
 	// This reads in the command-line flag value and assigns it to the addr
@@ -68,6 +69,7 @@ func main() {
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
 	session.Secure = true
+	session.SameSite = http.SameSiteStrictMode
 
 	app := &application{
 		errorLog: errorLog,
@@ -76,6 +78,7 @@ func main() {
 		// initialize a mysql.SnippetModel instance and add it to the application dependencies.
 		snippets: &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
+		users: &mysql.UserModel{DB: db},
 	}
 	// use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern
