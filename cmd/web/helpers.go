@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
-	"bytes"
 	"time"
+
 	"github.com/justinas/nosurf" // New import
+	"mayuraandrew.tech/snippetbox/pkg/models"
 )
 
 // the serverError helper write an error message and stack trace to the errorlog
@@ -66,7 +68,12 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	return td
 }
 
-func (app *application) authenticatedUser(r *http.Request) int {
-	return app.session.GetInt(r, "userID")
+func (app *application) authenticatedUser(r *http.Request) *models.User {
+	user, ok := r.Context().Value(contextKeyUser).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
+
 }
 

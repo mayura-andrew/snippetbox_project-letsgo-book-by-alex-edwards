@@ -19,6 +19,10 @@ import (
 // web application. For now we'll only include fields for the two custom logger
 // we'll add more to it as the build progresses.
 
+type contextKey string
+
+var contextKeyUser = contextKey("user")
+
 type application struct {
 	errorLog *log.Logger
 	infoLog *log.Logger
@@ -38,7 +42,7 @@ func main() {
 	// Define a new command-line flag for the MySQL DNS string
 	//fmt.Printf("web:pass@tcp(localhost:3306)/snippetbox?parseTime=true")
 
-	dsn := flag.String("dsn", "andrew:andrewSQL@/snippetbox?parseTime=true", "MySQL database")
+	dsn := flag.String("dsn", "root:mypass@/snippetbox?parseTime=true", "MySQL database")
 
 	// Importantly, we use the flag.Parse() function to parse the command-line
 	// This reads in the command-line flag value and assigns it to the addr
